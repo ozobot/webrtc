@@ -1,0 +1,88 @@
+name: Build Artifacts
+
+on:
+  schedule:
+    - cron: "0 0 1 * *"
+  workflow_dispatch:
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout this repository
+        uses: actions/checkout@v3
+
+      - name: Use Cache
+        uses: actions/cache@v3
+        with:
+          key: tools-n-output
+          path: |
+            depot_tools
+            src/out
+
+      - name: Checkout depot_tools
+        run: |
+          if [ ! -d "depot_tools" ]; then
+            git clone --depth=1 --filter=tree:0 https://chromium.googlesource.com/chromium/tools/depot_tools.git depot_tools
+          fi
+
+      - name: Add depot_tools to PATH
+        run: echo "$GITHUB_WORKSPACE/depot_tools" >> $GITHUB_PATH
+
+      - name: Fetch webrtc repository
+        run: fetch --nohooks --no-history webrtc_android
+
+      - name: Sync repositories
+        run: gclient sync --no-history --shallow
+
+      - name: Generate build files with GN
+        run: |
+          cd src
+          gn gen out --args='target_os="android" target_cpu="arm64"'
+          python3 build/install-build-deps.py
+          cd ..        
+
+      - name: Build AAR
+        run: |
+          cd src
+          . build/android/envsetup.sh
+          python3 tools_webrtc/android/build_aar.py
+          cd ..
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: aar-artifact
+          path: src/libwebrtc.aar
+
+  publish-android:
+    runs-on: ubuntu-latest
+    needs: [ android ]
+    steps:
+      - name: Checkout this repository
+        uses: actions/checkout@v3
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: aar-artifact
+          path: src/
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: temurin
+          cache: gradle
+
+      - name: Setup Upload Metadata
+        run: |
+          version=`date +'%Y%m%d'`
+          echo "ArtifactVersion=$version" >> gradle.properties
+          echo "GithubPassword=${{ secrets.AUTH_TOKEN }}" >> gradle.properties
+          echo "GithubUsername=${{ secrets.AUTH_USER }}" >> gradle.properties
+
+      - name: Publish to Packages
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: publishAllPublicationsToGithubRepository

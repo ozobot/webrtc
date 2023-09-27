@@ -1,0 +1,24 @@
+plugins {
+    id "maven-publish"
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "Github"
+            url = uri("https://maven.pkg.github.com/ozobot/webrtc")
+            credentials {
+                username = GithubUsername
+                password = GithubPassword
+            }
+        }
+    }
+    publications {
+        gpr(MavenPublication) {
+            groupId "org.webrtc"
+            version ArtifactVersion
+            artifactId "webrtc-android"
+            artifact("src/libwebrtc.aar")
+        }
+    }
+}

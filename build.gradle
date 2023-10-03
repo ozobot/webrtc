@@ -1,23 +1,48 @@
 plugins {
-    id "maven-publish"
+    id "java-library"
+    id "com.vanniktech.maven.publish" version "0.25.3"
+}
+
+javadoc {}
+
+tasks.register('unzip') {
+    inputs.file("src/libwebrtc.aar")
+    outputs.dir(new File(buildDir, "libwebrtc"))
+    doLast {
+        def tree = zipTree(inputs.files.singleFile)
+        copy {
+            from(tree)
+            into(outputs.files.singleFile)
+        }
+    }
+}
+
+tasks.register('sourcesJar', Jar) {
+    dependsOn "unzip"
+    from file(new File(buildDir, "libwebrtc").toString() + "/classes.jar")
+    archiveClassifier = "sources"
+}
+
+tasks.register('javadocJar', Jar) {
+    dependsOn "simpleJavadocJar"
+    from javadoc
+    archiveClassifier = "javadoc"
+}
+
+afterEvaluate {
+    tasks.named("signMavenPublication") {
+        mustRunAfter "javadocJar"
+    }
 }
 
 publishing {
-    repositories {
-        maven {
-            name = "Github"
-            url = uri("https://maven.pkg.github.com/ozobot/webrtc")
-            credentials {
-                username = GithubUsername
-                password = GithubPassword
-            }
-        }
-    }
     publications {
-        gpr(MavenPublication) {
-            groupId "org.webrtc"
-            version ArtifactVersion
-            artifactId "webrtc-android"
+        aar(MavenPublication) {
+            groupId GROUP
+            version VERSION_NAME
+            artifactId POM_ARTIFACT_ID
+            artifact(sourcesJar)
+            artifact(javadocJar)
             artifact("src/libwebrtc.aar")
         }
     }

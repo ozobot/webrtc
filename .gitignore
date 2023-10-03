@@ -208,6 +208,8 @@ captures/
 .externalNativeBuild/
 .cxx/
 *.apk
+*.aar
+*.aab
 output.json
 
 # IntelliJ

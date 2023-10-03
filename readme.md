@@ -32,42 +32,6 @@ Key Features:
 
 ```gradle
 dependencies {
-   implementation "org.webrtc:webrtc-android:latest.version"
-}
-```
-
-`/build.gradle`
-
-```gradle
-repositories {
-    maven {
-        name = "grc-ozobot-webrtc"
-        url = uri("https://maven.pkg.github.com/ozobot/webrtc")
-        credentials {
-            username = System.getenv("AUTH_USER") ?: GithubUsername
-            password = System.getenv("AUTH_TOKEN") ?: GithubPassword
-        }
-    }
-}
-```
-
--- or --
-
-`/settings.gradle`
-
-```gradle
-dependencyResolutionManagement {
-    // ...
-    repositories {
-        // ...
-        maven {
-            name = "grc-ozobot-webrtc"
-            url = uri("https://maven.pkg.github.com/ozobot/webrtc")
-            credentials {
-                username = System.getenv("AUTH_USER") ?: GithubUsername
-                password = System.getenv("AUTH_TOKEN") ?: GithubPassword
-            }
-        }
-    }
+   implementation "com.ozobot:webrtc-android:latest.version"
 }
 ```

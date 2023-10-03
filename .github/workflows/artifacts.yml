@@ -78,11 +78,14 @@ jobs:
       - name: Setup Upload Metadata
         run: |
           version=`date +'%Y%m%d'`
-          echo "ArtifactVersion=$version" >> gradle.properties
-          echo "GithubPassword=${{ secrets.AUTH_TOKEN }}" >> gradle.properties
-          echo "GithubUsername=${{ secrets.AUTH_USER }}" >> gradle.properties
+          echo "VERSION_NAME=$version" >> gradle.properties
+          echo "mavenCentralUsername=${{ secrets.MAVEN_USER }}" >> gradle.properties
+          echo "mavenCentralPassword=${{ secrets.MAVEN_PASS }}" >> gradle.properties
+          echo "signingInMemoryKeyId=${{ secrets.SIGNING_KEY_ID }}" >> gradle.properties
+          echo "signingInMemoryKeyPassword=${{ secrets.SIGNING_KEY_PASS }}" >> gradle.properties
+          echo "signingInMemoryKey=${{ secrets.SIGNING_KEY }}" >> gradle.properties
 
       - name: Publish to Packages
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: publishAllPublicationsToGithubRepository
+          arguments: publishAarPublicationToMavenCentralRepository

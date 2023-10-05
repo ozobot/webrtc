@@ -28,7 +28,7 @@ Key Features:
 
 ## Download
 
-[latest.version](https://github.com/ozobot/webrtc/packages/1956052)
+[latest.version](https://central.sonatype.com/artifact/com.ozobot/webrtc-android)
 
 ```gradle
 dependencies {

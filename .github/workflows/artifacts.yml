@@ -78,6 +78,7 @@ jobs:
       - name: Setup Upload Metadata
         run: |
           version=`date +'%Y%m%d'`
+          echo "" >> gradle.properties
           echo "VERSION_NAME=$version" >> gradle.properties
           echo "mavenCentralUsername=${{ secrets.MAVEN_USER }}" >> gradle.properties
           echo "mavenCentralPassword=${{ secrets.MAVEN_PASS }}" >> gradle.properties
